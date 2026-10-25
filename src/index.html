@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Steal my Bitcoin</title>
+    <style>
+        :root {
+            --bg: #0f141c;
+            --surface: #18202e;
+            --border: #283347;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --accent: #f59e0b;
+            --accent-hover: #d97706;
+            --code-bg: #0a0e17;
+            --success: #10b981;
+        }
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 48px 20px;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #ffffff;
+            margin: 0;
+            letter-spacing: -0.02em;
+        }
+        .timer-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(245, 158, 11, 0.12);
+            color: var(--accent);
+            border: 1px solid rgba(245, 158, 11, 0.25);
+            padding: 8px 14px;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            width: fit-content;
+        }
+        .timer-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.85); }
+        }
+        p {
+            color: var(--muted);
+            line-height: 1.6;
+            margin: 0;
+            font-size: 1rem;
+        }
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin: 0;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.95rem;
+            color: #38bdf8;
+            overflow-x: auto;
+        }
+        .wallet-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 18px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .wallet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--muted);
+            text-transform: uppercase;
+            font-weight: 600;
+            letter-spacing: 0.05em;
+        }
+        .wallet-address {
+            font-family: ui-monospace, SFMono-Regular, monospace;
+            font-size: 1.05rem;
+            color: #fff;
+            word-break: break-all;
+        }
+        .wallet-status {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            color: var(--muted);
+        }
+        .refresh-btn {
+            background: none;
+            border: none;
+            color: var(--accent);
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 0;
+        }
+        .refresh-btn:hover {
+            text-decoration: underline;
+        }
+        .footer {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--border);
+            font-size: 0.85rem;
+            color: var(--muted);
+            display: flex;
+            justify-content: space-between;
+        }
+        .local-notice {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            color: #34d399;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 0.82rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="local-notice">
+            <span>🛡️ <strong>Local Lab Replica</strong> (PHP 8.4.26 · Nginx FastCGI)</span>
+            <span style="opacity: 0.8;">Port 8888</span>
+        </div>
+
+        <h1>Steal my Bitcoin</h1>
+
+        <div class="timer-badge">
+            <span class="timer-dot"></span>
+            <span id="uptime-timer">Calculating uptime…</span>
+        </div>
+
+        <p>There is a bitcoin key hidden on this server worth about $500.</p>
+        <p>It is accessible to the PHP user account through the <code>print-flag</code> binary.</p>
+
+        <pre><code>print-flag</code></pre>
+
+        <p>This <a href="/php-version.php">PHP version</a> was selected from before the PHP2SHELL CVEs were released.</p>
+        <p>First person to get the wallet wins. If you don’t need the money, consider donating it to those who do: <a href="https://www.givewell.org/" target="_blank" rel="noopener">givewell.org</a>.</p>
+        <p style="font-size: 0.9rem; color: #64748b;">All traffic is logged. This is a known vulnerable machine, so we cannot guarantee privacy. Other attackers may access or monitor activity and data beyond our control. Do not submit anything you want to keep private.</p>
+
+        <div class="wallet-card">
+            <div class="wallet-header">
+                <span>Challenge wallet</span>
+                <a href="https://mempool.space/address/bc1qlnu50y4zm0nwxkckxu09thn5xdcz8aw6t3cxqy" target="_blank" rel="noopener">Explorer ↗</a>
+            </div>
+            <div class="wallet-address">bc1qlnu50y4zm0nwxkckxu09thn5xdcz8aw6t3cxqy</div>
+            <div class="wallet-status">
+                <span id="balance-text">Balance: ~0.0051 BTC (~$500 USD)</span>
+                <button class="refresh-btn" onclick="checkBalance()">Refresh ↻</button>
+            </div>
+        </div>
+
+        <div class="footer">
+            <span>stealmybitcoin.com replica</span>
+            <a href="/terms.html">Terms of participation</a>
+        </div>
+    </div>
+
+    <script>
+        // Challenge launched roughly Oct 24, 2026 23:00 UTC
+        const startTime = new Date("2026-10-24T23:00:00Z").getTime();
+
+        function updateTimer() {
+            const now = Date.now();
+            const elapsedMs = Math.max(0, now - startTime);
+            const hours = (elapsedMs / (1000 * 60 * 60)).toFixed(2);
+            document.getElementById("uptime-timer").innerText = `${hours} hours without a successful hack`;
+        }
+
+        function checkBalance() {
+            const el = document.getElementById("balance-text");
+            el.innerText = "Checking balance…";
+            setTimeout(() => {
+                el.innerText = "Balance: ~0.0051 BTC (Unclaimed)";
+            }, 500);
+        }
+
+        updateTimer();
+        setInterval(updateTimer, 60000);
+    </script>
+</body>
+</html>

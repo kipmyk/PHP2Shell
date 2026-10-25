@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PHP2Shell Investigation & Test Harness Audit</title>
+    <style>
+        :root {
+            --bg: #090d16;
+            --surface: #111827;
+            --surface-card: #1f2937;
+            --border: #374151;
+            --text: #f3f4f6;
+            --muted: #9ca3af;
+            --accent: #38bdf8;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --danger: #f87171;
+            --terminal-bg: #030712;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+            background: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 32px;
+            line-height: 1.5;
+        }
+        .header {
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 16px;
+        }
+        h1 {
+            margin: 0 0 8px 0;
+            font-size: 1.8rem;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .status-badge {
+            background: #4b5563;
+            color: #f3f4f6;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid #6b7280;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 24px;
+        }
+        .full-width {
+            grid-column: 1 / -1;
+        }
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 20px;
+        }
+        .card-title {
+            font-size: 1.05rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: #fff;
+        }
+        .terminal {
+            background: var(--terminal-bg);
+            border: 1px solid #1f2937;
+            border-radius: 6px;
+            padding: 14px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+            font-size: 0.83rem;
+            overflow-x: auto;
+            color: #d1d5db;
+            line-height: 1.6;
+        }
+        .t-green { color: #34d399; }
+        .t-cyan { color: #38bdf8; }
+        .t-yellow { color: #fbbf24; }
+        .t-muted { color: #9ca3af; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+            margin-top: 8px;
+        }
+        th, td {
+            text-align: left;
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+        }
+        th {
+            background: #1e293b;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>PHP2Shell Investigation Audit <span class="status-badge">Source changes verified; exploitability not reproduced</span></h1>
+        <p style="color: var(--muted); margin: 4px 0 0 0;">
+            Target: <code>PHP 8.4.26</code> vs <code>PHP 8.4.27</code> · Official upstream test harness & empirical audit
+        </p>
+    </div>
+
+    <div class="grid">
+        <!-- Upstream run-tests.php Execution -->
+        <div class="card full-width">
+            <div class="card-title">
+                <span>1. Official Upstream Test Harness Execution (run-tests.php)</span>
+                <span style="font-size: 0.8rem; color: var(--accent);">Prerequisites & Harness Audit</span>
+            </div>
+            <div class="terminal">
+<span class="t-cyan">$ docker run --rm -v $(pwd)/php-src-audit:/src -w /src php:8.4.27-fpm php run-tests.php -P tests/basic/oom_rfc1867_upload_progress.phpt</span>
+Running selected tests.
+TEST 1/1 [tests/basic/oom_rfc1867_upload_progress.phpt]
+<span class="t-yellow">SKIP rfc1867: the session upload progress handler doesn't reach the hard limit [tests/basic/oom_rfc1867_upload_progress.phpt] reason: php-cgi not available</span>
+
+<span class="t-muted"># Audit Note: oom_rfc1867_skipif.inc requires getenv('TEST_PHP_CGI_EXECUTABLE'). The official FPM image supplies CLI and FPM, not CGI.</span>
+
+<span class="t-cyan">$ docker run --rm -v $(pwd)/php-src-audit:/src -w /src php:8.4.27-fpm php run-tests.php -P sapi/cli/tests/oom_request_parsing_next_request.phpt</span>
+TEST 1/1 [sapi/cli/tests/oom_request_parsing_next_request.phpt]
+<span class="t-green">PASS OOM during request parsing does not leak into the next request [sapi/cli/tests/oom_request_parsing_next_request.phpt] (0.150s)</span>
+
+<span class="t-cyan">$ docker run --rm -v $(pwd)/php-src-audit:/src -w /src php:8.4.26-fpm php run-tests.php -P sapi/cli/tests/oom_request_parsing_next_request.phpt</span>
+TEST 1/1 [sapi/cli/tests/oom_request_parsing_next_request.phpt]
+<span class="t-green">PASS OOM during request parsing does not leak into the next request [sapi/cli/tests/oom_request_parsing_next_request.phpt] (0.135s)</span>
+
+<span class="t-muted"># Finding: Both versions pass this URL-encoded CLI-server parsing test; this does not prove the vulnerability is absent in multipart paths.</span>
+            </div>
+        </div>
+
+        <!-- Controlled Header Benchmark -->
+        <div class="card">
+            <div class="card-title">
+                <span>2. Multipart Header Parsing Timing</span>
+                <span style="font-size: 0.8rem; color: var(--accent);">rfc1867.c Observation</span>
+            </div>
+            <div class="terminal">
+<span class="t-cyan">$ python3 exploit_lab/test_multipart_headers.py</span>
+[*] Payload size: 652,916 bytes (15,000 headers)
+PHP 8.4.26 (:8888): <span class="t-yellow">HTTP 200 (28.9ms)</span>
+PHP 8.4.27 (:8889): <span class="t-green">HTTP 200 (10.6ms)</span>
+
+[*] Payload size: 1,327,916 bytes (30,000 headers)
+PHP 8.4.26 (:8888): <span class="t-yellow">HTTP 200 (25.5ms)</span>
+PHP 8.4.27 (:8889): <span class="t-green">HTTP 200 (12.9ms)</span>
+
+<span class="t-muted"># Measured: Timing difference observed in reported runs.</span>
+<span class="t-muted"># Limit: Does not prove exact allocation count without direct allocator profiling.</span>
+            </div>
+        </div>
+
+        <!-- Sequential Session Updates -->
+        <div class="card">
+            <div class="card-title">
+                <span>3. Sequential Upload Progress Session Files</span>
+                <span style="font-size: 0.8rem; color: var(--success);">Session State Observation</span>
+            </div>
+            <div class="terminal">
+<span class="t-cyan">$ python3 exploit_lab/compare_regression.py</span>
+[*] Target 8888 (PHP 8.4.26):
+  Request 1: <span class="t-green">HTTP 200 (16.8ms)</span> -> sess file: 377 bytes
+  Request 2: <span class="t-green">HTTP 200 (7.3ms)</span>  -> sess file: 755 bytes
+[*] Target 8889 (PHP 8.4.27):
+  Request 1: <span class="t-green">HTTP 200 (6.4ms)</span>  -> sess file: 377 bytes
+  Request 2: <span class="t-green">HTTP 200 (5.9ms)</span>  -> sess file: 755 bytes
+
+<span class="t-muted"># Measured: Both versions successfully append progress keys.</span>
+<span class="t-muted"># Limit: Retained session files alone do not establish memory safety.</span>
+            </div>
+        </div>
+
+        <!-- Summary Matrix -->
+        <div class="card full-width">
+            <div class="card-title">
+                <span>4. Evidence Matrix: What is Proven vs Unproven</span>
+            </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Investigation Area</th>
+                        <th>Proven by Current Evidence</th>
+                        <th>Unproven / Open Questions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Upstream Source Diff</strong></td>
+                        <td>Specific patches exist in <code>main/rfc1867.c</code> and <code>ext/session/session.c</code> for GHSA-w8hw-w9fx-j79w and GHSA-6wmf-4rv5-p3rp.</td>
+                        <td>Whether the patch covers all potential edge cases in non-standard configurations.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Official Test Harness</strong></td>
+                        <td><code>oom_rfc1867_upload_progress.phpt</code> requires <code>php-cgi</code> and skips under standard FPM containers.</td>
+                        <td>Full pass/fail assertion output of <code>oom_rfc1867_upload_progress.phpt</code> when compiled with CGI SAPI.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Controlled HTTP Tests</strong></td>
+                        <td>Both versions process multipart and upload-progress requests returning <code>200 pong</code>.</td>
+                        <td>Exploitability under crafted bailout conditions was not observed.</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Public Challenge Server</strong></td>
+                        <td>Advertises PHP 8.4.26 dynamically on <code>/php-version.php</code>.</td>
+                        <td>Internal server configuration, worker count, or proxy rules remain unverified from outside.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</body>
+</html>
