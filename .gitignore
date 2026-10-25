@@ -1,0 +1,22 @@
+# Upstream PHP source checkout (do not commit 25,000+ php-src files)
+php-src-audit/
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+
+# Temporary and log files
+*.log
+/tmp/
+*.swp
+*~
+
+# Local environment overrides
+.env.local
