@@ -1,0 +1,24 @@
+FROM php:8.4.27-fpm
+
+# Install debugging and analysis utilities
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gdb \
+    strace \
+    procps \
+    curl \
+    net-tools \
+    binutils \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create mock print-flag binary
+COPY bin/print-flag.c /tmp/print-flag.c
+RUN gcc /tmp/print-flag.c -o /usr/local/bin/print-flag \
+    && chmod 4755 /usr/local/bin/print-flag \
+    && rm /tmp/print-flag.c
+
+# Ensure standard permissions
+WORKDIR /var/www/html
+RUN chown -R www-data:www-data /var/www/html /tmp
+
+EXPOSE 9000
+CMD ["php-fpm", "-F"]
