@@ -12,9 +12,14 @@ An isolated, dual-target local research lab replicating the [stealmybitcoin.com]
 * **CVE-2026-109619 (`GHSA-6wmf-4rv5-p3rp`):** Multipart `session.upload_progress` tracking running before `PHP_RINIT`, leading to uninitialized module globals across requests on persistent PHP-FPM workers.
 * **Investigation Status:** **Source changes verified; exploitability not reproduced**. Full audit and source diffs are documented in [docs/AUDIT_REPORT.md](docs/AUDIT_REPORT.md).
 
+## Disclaimer & Terms of Use
+
 > [!WARNING]
-> **DISCLAIMER: FOR EDUCATIONAL AND RESEARCH PURPOSES ONLY**
-> This repository, including its Docker environments and benchmark scripts, is created strictly for academic research, defensive security evaluation, and educational study of PHP runtime internals. The author accepts no liability and cannot be held responsible for any misuse, unauthorized access, disruption, or damages resulting from the use or adaptation of these materials. Test only in isolated local environments where you have explicit authorization.
+> **STRICTLY FOR TESTING AND EDUCATIONAL PURPOSES**
+> 
+> * **Educational Purpose Only:** This documentation, research lab, and analysis are provided strictly for educational purposes, defensive engineering, and understanding PHP runtime security.
+> * **Limitation of Liability:** The author and contributors are not responsible for any misuse, unauthorized access, operational disruption, damage, or legal consequences resulting from the application or adaptation of information contained in this repository.
+> * **Ethical & Authorized Scope:** All experimentation was performed solely within an isolated local Docker testbed. Do not deploy, scan, or execute tests against systems, networks, or infrastructure without explicit, authorized permission.
 
 ---
 
