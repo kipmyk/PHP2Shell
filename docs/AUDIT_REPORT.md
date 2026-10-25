@@ -138,3 +138,15 @@ docker run --rm -v $(pwd)/php-src-audit:/src -w /src php:8.4.26-fpm \
 To execute the actual upstream regression test (`oom_rfc1867_upload_progress.phpt`) without skips:
 1. Compile the `php-cgi` binary from the checkout in `php-src-audit` for both `php-8.4.26` and `php-8.4.27`.
 2. Set `TEST_PHP_CGI_EXECUTABLE=/path/to/php-cgi` and execute `run-tests.php` to observe the official soft-limit memory assertions directly.
+
+---
+
+## 8. Disclaimer & Terms of Use
+
+> [!WARNING]
+> **STRICTLY FOR TESTING AND EDUCATIONAL PURPOSES**
+> 
+> * **Educational Purpose Only:** This documentation, research lab, and analysis are provided strictly for educational purposes, defensive engineering, and understanding PHP runtime security.
+> * **Limitation of Liability:** The author and contributors are not responsible for any misuse, unauthorized access, operational disruption, damage, or legal consequences resulting from the application or adaptation of information contained in this repository.
+> * **Ethical & Authorized Scope:** All experimentation was performed solely within an isolated local Docker testbed. Do not deploy, scan, or execute tests against systems, networks, or infrastructure without explicit, authorized permission.
+

@@ -12,6 +12,10 @@ An isolated, dual-target local research lab replicating the [stealmybitcoin.com]
 * **CVE-2026-109619 (`GHSA-6wmf-4rv5-p3rp`):** Multipart `session.upload_progress` tracking running before `PHP_RINIT`, leading to uninitialized module globals across requests on persistent PHP-FPM workers.
 * **Investigation Status:** **Source changes verified; exploitability not reproduced**. Full audit and source diffs are documented in [docs/AUDIT_REPORT.md](docs/AUDIT_REPORT.md).
 
+> [!WARNING]
+> **DISCLAIMER: FOR EDUCATIONAL AND RESEARCH PURPOSES ONLY**
+> This repository, including its Docker environments and benchmark scripts, is created strictly for academic research, defensive security evaluation, and educational study of PHP runtime internals. The author accepts no liability and cannot be held responsible for any misuse, unauthorized access, disruption, or damages resulting from the use or adaptation of these materials. Test only in isolated local environments where you have explicit authorization.
+
 ---
 
 ## Architecture Overview
@@ -117,3 +121,12 @@ gdb -p $(pgrep -o php-fpm)
 │   └── screenshots/                # Visual audit evidence
 └── exploit_lab/                    # Controlled comparative test scripts
 ```
+
+---
+
+## Disclaimer & Legal Terms
+
+1. **Educational & Defensive Purpose:** This repository is maintained strictly for educational research, threat modeling, and defensive engineering. It provides an isolated lab to study reported PHP engine memory behaviors and upstream patch mechanics.
+2. **No Warranty & Limitation of Liability:** The materials and scripts are provided "as is", without warranty of any kind. Under no circumstances shall the author, contributors, or copyright holders be liable for any claim, damages, data loss, or other liability arising from the use, execution, or modification of this software.
+3. **Authorized Testing Only:** Never test, scan, or execute exploit payloads against third-party systems, networks, or production servers without prior explicit written permission from the authorized owner.
+
