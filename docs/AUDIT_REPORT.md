@@ -1,6 +1,6 @@
 # PHP2Shell (CVE-2026-109618 & CVE-2026-109619) Local Investigation Report
 
-**Target Environment:** Isolated Docker Lab replicating [stealmybitcoin.com](https://stealmybitcoin.com)  
+**Target Environment:** Isolated Dual-Target Docker Lab (PHP 8.4.26 vs PHP 8.4.27)  
 **Baseline Under Investigation:** `PHP 8.4.26` (Port 8888)  
 **Patched Comparison Build:** `PHP 8.4.27` (Port 8889)  
 **Upstream Source Audit:** `php/php-src` (Tags `php-8.4.26` and `php-8.4.27`)  
@@ -10,7 +10,7 @@
 
 ## 1. Executive Summary
 
-This investigation evaluated the differences between **PHP 8.4.26** (the version advertised by [stealmybitcoin.com](https://stealmybitcoin.com/php-version.php)) and the patched **PHP 8.4.27** release in an isolated local lab.
+This investigation evaluated the differences between **PHP 8.4.26** (the pre-patch baseline under investigation) and the patched **PHP 8.4.27** release in an isolated local lab.
 
 * **Upstream Source Diffs:** Confirmed that upstream security patches for `GHSA-w8hw-w9fx-j79w` (`CVE-2026-109618`) and `GHSA-6wmf-4rv5-p3rp` (`CVE-2026-109619`) introduced multipart MIME header filtering, pre-RINIT session global resets, and restricted deserialization to incomplete classes.
 * **Test Harness Execution:** Running the official upstream `run-tests.php` harness revealed that `tests/basic/oom_rfc1867_upload_progress.phpt` skips in standard container environments because it explicitly requires `php-cgi` (`TEST_PHP_CGI_EXECUTABLE`).
@@ -22,7 +22,7 @@ This investigation evaluated the differences between **PHP 8.4.26** (the version
 
 ![PHP2Shell Test Results Audit Dashboard](screenshots/audit_dashboard.png)
 
-![Local StealMyBitcoin Challenge UI Replica](screenshots/challenge_ui.png)
+![Local Challenge UI Replica](screenshots/challenge_ui.png)
 
 ---
 
@@ -147,6 +147,7 @@ To execute the actual upstream regression test (`oom_rfc1867_upload_progress.php
 > **STRICTLY FOR TESTING AND EDUCATIONAL PURPOSES**
 > 
 > * **Educational Purpose Only:** This documentation, research lab, and analysis are provided strictly for educational purposes, defensive engineering, and understanding PHP runtime security.
+> * **Isolated Local Testing:** All experiments should be conducted in an isolated local environment using systems and resources the researcher is authorized to test.
 > * **Limitation of Liability:** The author and contributors are not responsible for any misuse, unauthorized access, operational disruption, damage, or legal consequences resulting from the application or adaptation of information contained in this repository.
 > * **Ethical & Authorized Scope:** All experimentation was performed solely within an isolated local Docker testbed. Do not deploy, scan, or execute tests against systems, networks, or infrastructure without explicit, authorized permission.
 

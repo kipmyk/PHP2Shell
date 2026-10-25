@@ -1,6 +1,6 @@
-# PHP2Shell Research Lab (Local Replica of stealmybitcoin.com)
+# PHP2Shell Vulnerability Research Lab (PHP 8.4.26 vs PHP 8.4.27)
 
-An isolated, dual-target local research lab replicating the [stealmybitcoin.com](https://stealmybitcoin.com) challenge environment. It enables side-by-side analysis of **PHP 8.4.26** (the baseline under investigation) versus **PHP 8.4.27** (the upstream security patch) behind **Nginx FastCGI**.
+An isolated, dual-target local research lab for analyzing the reported PHP2Shell vulnerabilities (CVE-2026-109618 and CVE-2026-109619). It enables side-by-side comparative analysis of **PHP 8.4.26** (the pre-patch baseline under investigation) versus **PHP 8.4.27** (the upstream security patch) behind **Nginx FastCGI**.
 
 ![Audit Dashboard](docs/screenshots/audit_dashboard.png)
 
@@ -18,6 +18,7 @@ An isolated, dual-target local research lab replicating the [stealmybitcoin.com]
 > **STRICTLY FOR TESTING AND EDUCATIONAL PURPOSES**
 > 
 > * **Educational Purpose Only:** This documentation, research lab, and analysis are provided strictly for educational purposes, defensive engineering, and understanding PHP runtime security.
+> * **Isolated Local Testing:** All experiments should be conducted in an isolated local environment using systems and resources the researcher is authorized to test.
 > * **Limitation of Liability:** The author and contributors are not responsible for any misuse, unauthorized access, operational disruption, damage, or legal consequences resulting from the application or adaptation of information contained in this repository.
 > * **Ethical & Authorized Scope:** All experimentation was performed solely within an isolated local Docker testbed. Do not deploy, scan, or execute tests against systems, networks, or infrastructure without explicit, authorized permission.
 
@@ -131,7 +132,7 @@ gdb -p $(pgrep -o php-fpm)
 
 ## Disclaimer & Legal Terms
 
-1. **Educational & Defensive Purpose:** This repository is maintained strictly for educational research, threat modeling, and defensive engineering. It provides an isolated lab to study reported PHP engine memory behaviors and upstream patch mechanics.
+1. **Educational & Defensive Purpose:** This repository is maintained strictly for educational research, threat modeling, and defensive engineering. It provides an isolated lab to study reported PHP engine memory behaviors and upstream patch mechanics. All experiments should be conducted in an isolated local environment using systems and resources the researcher is authorized to test.
 2. **No Warranty & Limitation of Liability:** The materials and scripts are provided "as is", without warranty of any kind. Under no circumstances shall the author, contributors, or copyright holders be liable for any claim, damages, data loss, or other liability arising from the use, execution, or modification of this software.
 3. **Authorized Testing Only:** Never test, scan, or execute exploit payloads against third-party systems, networks, or production servers without prior explicit written permission from the authorized owner.
 
