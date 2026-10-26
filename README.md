@@ -10,7 +10,7 @@ An isolated, dual-target local research lab for analyzing the reported PHP2Shell
 
 * **CVE-2026-109618 (`GHSA-w8hw-w9fx-j79w`):** Unsafe memory cleanup and allocator state handling during early request parsing and `zend_bailout()` aborts.
 * **CVE-2026-109619 (`GHSA-6wmf-4rv5-p3rp`):** Multipart `session.upload_progress` tracking running before `PHP_RINIT`, leading to uninitialized module globals across requests on persistent PHP-FPM workers.
-* **Investigation Status:** **Source changes verified; exploitability not reproduced**. Full audit and source diffs are documented in [docs/AUDIT_REPORT.md](docs/AUDIT_REPORT.md).
+* **Investigation Status:** **Source changes verified; exploitability not reproduced**. Technical findings and methodology write-up are published on [mike.co.ke](https://mike.co.ke).
 
 ## Disclaimer & Terms of Use
 
@@ -171,7 +171,6 @@ gdb -p $(pgrep -o php-fpm)
 │   ├── php-version.php             # Target version endpoint
 │   └── dashboard.html              # Investigation audit dashboard
 ├── docs/
-│   ├── AUDIT_REPORT.md             # Complete source diff and test report
 │   └── screenshots/                # Visual audit evidence
 └── exploit_lab/                    # Controlled comparative test scripts
 ```

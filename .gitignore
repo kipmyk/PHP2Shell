@@ -22,3 +22,8 @@ poc-run-*/
 
 # Local environment overrides
 .env.local
+
+# Private website drafts and reports (published on mike.co.ke)
+docs/ARTICLE_DRAFT.md
+docs/X_POST_DRAFT.md
+docs/AUDIT_REPORT.md
