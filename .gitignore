@@ -17,6 +17,8 @@ venv/
 /tmp/
 *.swp
 *~
+audit-run-*/
+poc-run-*/
 
 # Local environment overrides
 .env.local
