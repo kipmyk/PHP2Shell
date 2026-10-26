@@ -122,18 +122,51 @@ docker run --rm -v $(pwd)/php-src-audit:/src -w /src php:8.4.26-fpm \
 
 ---
 
-## 6. What the Results Prove vs. What Remains Unproven
+## 6. Exploit Chain Testing & SAPI Sensitivity Analysis
+
+### A. Exploit Chain Methodology
+* **Script:** `python3 exploit_lab/exploit_chain_poc.py`
+* **Mechanics:**
+  1. **Stage 1 (OOM Exhaustion):** Sends a compact (~250 KiB) multipart payload with deeply nested array keys (`f[i][x][x]...` nested 57 levels deep) alongside `session.upload_progress` and `PHPSESSID="\x00"` to trigger early request parsing bailout.
+  2. **Stage 2 (Heap Chunk Base Leak):** Pipelines 8 consumer requests immediately behind the producer to query the reused worker, aiming to disclose neighbouring Zend heap chunks in an expanded 256-byte cookie.
+  3. **Stage 3 (Code Pointer Disclosure):** Second tailored batch aiming to leak `zval_ptr_dtor` page offset (`0x112930`).
+  4. **Stage 4 (Execution Callback):** Forged 384-byte `zend_array` with `pDestructor` targeting `zif_system`.
+
+### B. Empirical Results on Local Docker Lab
+* **Target 1 (`http://127.0.0.1:8888/php-version.php` - PHP 8.4.26 Debian FPM):**
+  * Stage 0 Preflight: `HTTP 200 (Powered-By: PHP/8.4.26)`
+  * Producer Response: `HTTP 200 OK` (0-byte body). Did not trigger a 128 MiB memory limit fatal.
+  * Consumers: Returned `HTTP 200` with 0-byte cookies. No heap pointers or chunk base leaked.
+  * **Result:** Exploit chain aborted at Stage 2.
+* **Target 2 (`http://127.0.0.1:8889/php-version.php` - PHP 8.4.27 Patched FPM):**
+  * Stage 0 Preflight: `HTTP 200 (Powered-By: PHP/8.4.27)`
+  * Producer Response: `HTTP 200 OK`. Handled safely with upstream header filtering.
+  * Consumers: Returned `HTTP 200` with 0-byte cookies.
+  * **Result:** No leak observed.
+
+### C. Key Finding on Environment Sensitivity
+The reported end-to-end exploit was calibrated specifically for **Alpine Linux (musl libc) running the `cli-server` SAPI (`php -S 0.0.0.0:8000`) with `PHP_CLI_SERVER_WORKERS=4`**. 
+
+Our testbed utilizes **Debian Linux (glibc) with `php-fpm` behind Nginx FastCGI**. Key architectural differences:
+1. **SAPI Worker Model:** FPM recycles worker context and request globals differently than the multi-worker CLI development server.
+2. **Buffering & Pipelining:** FastCGI proxying buffers and serializes requests, whereas the exploit relies on raw HTTP/1.1 pipelining down a single TCP connection to race worker reuse.
+3. **Memory Allocator Layout:** Alpine's musl libc and specific PHP binary compile offsets (`DTOR_LOW21 = 0x112930`) differ from Debian ELF images, meaning ASLR-offset calculations do not translate across distributions.
+
+---
+
+## 7. What the Results Prove vs. What Remains Unproven
 
 | Area | Proven by Evidence | Not Proven / Unverified |
 | :--- | :--- | :--- |
 | **Upstream Code** | PHP 8.4.27 contains specific patches for MIME header filtering, pre-RINIT session resets, and incomplete-class restrictions. | Whether these specific changes completely mitigate all related bailout edge cases. |
 | **Local Environment** | Both containers communicate, run the specified PHP versions, and handle multipart traffic. | Whether the local FPM/Nginx configuration matches the live challenge server's exact internals. |
 | **Harness Requirements** | `oom_rfc1867_upload_progress.phpt` requires `php-cgi` and skips under standard FPM container builds. | How `oom_rfc1867_upload_progress.phpt` behaves when executed with a compiled CGI binary on 8.4.26. |
-| **Exploitability** | Exploitability was not reproduced locally; requests returned valid HTTP 200 responses. | The exact real-world exploitability or lack thereof under crafted memory corruption chains. |
+| **Exploit Chain Testing** | Tested `exploit_chain_poc.py` on local 8.4.26 and 8.4.27 FPM containers. The heap leak did not trigger. | Full reproduction requires specific Alpine CLI-server SAPI (`PHP_CLI_SERVER_WORKERS=4`) and musl memory layout. |
+| **Exploitability** | Exploitability was not reproduced locally; requests returned valid HTTP 200 responses. | The exact real-world exploitability or lack thereof under crafted memory corruption chains on non-Alpine builds. |
 
 ---
 
-## 7. Next Most Informative Local Step
+## 8. Next Most Informative Local Step
 
 To execute the actual upstream regression test (`oom_rfc1867_upload_progress.phpt`) without skips:
 1. Compile the `php-cgi` binary from the checkout in `php-src-audit` for both `php-8.4.26` and `php-8.4.27`.
