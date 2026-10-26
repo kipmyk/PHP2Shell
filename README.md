@@ -24,6 +24,54 @@ An isolated, dual-target local research lab for analyzing the reported PHP2Shell
 
 ---
 
+## Research Status and Limitations
+
+### Current findings
+
+This investigation examined the PHP source changes between the affected and patched versions, with particular attention to multipart form handling, session upload progress, and memory-management behavior.
+
+Initial tests against PHP 8.4.26 and PHP 8.4.27 returned successful HTTP responses. These tests did not reproduce the reported memory corruption or remote code execution.
+
+Source-level analysis and successful HTTP responses are not sufficient to establish exploitability or confirm that the vulnerability has been reproduced.
+
+### What remains unverified
+
+At this stage, I have not independently reproduced the complete reported exploit chain. In particular, the following remain unverified in my environment:
+
+- The reported memory-corruption behavior.
+- Session-cookie information disclosure.
+- Recovery of useful memory or code addresses.
+- The transition from memory corruption to remote code execution.
+
+The published PoC describes a different environment from my initial test setup. Differences in the operating system, PHP build, SAPI, worker configuration, and memory layout may affect reproducibility.
+
+### Limitations of the initial approach
+
+My initial investigation focused on comparing source changes and testing multipart requests against the affected and patched versions. That established a starting point, but it did not establish that my test cases exercised the precise failure condition addressed by the upstream fix.
+
+A successful HTTP response does not rule out a vulnerability. Equally, identifying relevant source changes does not prove that an exploit works.
+
+### Next steps
+
+The next phase will focus on reproducibility and stronger evidence:
+
+1. Run the relevant upstream regression test against affected and patched builds in an isolated environment.
+2. Record the PHP version, build configuration, SAPI, operating system, and worker model for each test.
+3. Determine whether the test reproduces the expected failure on the affected version and passes on the patched version.
+4. Investigate differences between the official regression test and my initial test cases.
+5. Keep source analysis, regression-test results, memory-corruption reproduction, and exploitability as separate research milestones.
+6. Document commands, logs, expected results, actual results, and limitations so that another researcher can independently evaluate the findings.
+
+### Research integrity
+
+I will distinguish between behavior confirmed by my own tests, findings reported by other researchers, and hypotheses that remain unverified.
+
+Until the relevant behavior is reproduced, I will not describe this investigation as a successful reproduction of the vulnerability.
+
+This repository is intended for defensive security research, controlled testing, and understanding the effectiveness of upstream fixes.
+
+---
+
 ## Architecture Overview
 
 ```
