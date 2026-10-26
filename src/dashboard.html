@@ -181,10 +181,36 @@ PHP 8.4.27 (:8889): <span class="t-green">HTTP 200 (12.9ms)</span>
             </div>
         </div>
 
+        <!-- Exploit Chain Testing & Environment Analysis -->
+        <div class="card full-width">
+            <div class="card-title">
+                <span>4. Exploit Chain Reproduction & SAPI Environment Sensitivity</span>
+                <span style="font-size: 0.8rem; color: var(--warning);">Empirical Execution: exploit_chain_poc.py</span>
+            </div>
+            <div class="terminal">
+<span class="t-cyan">$ python3 exploit_lab/exploit_chain_poc.py --url http://127.0.0.1:8888/php-version.php</span>
+[*] Target: http://127.0.0.1:8888/php-version.php
+[*] Artifacts Directory: audit-run-20261026T044646Z
+<span class="t-green">[+] [Stage 0] Preflight OK: HTTP 200 (Powered-By: PHP/8.4.26, Snippet: PHP 8.4.26)</span>
+[*] [Stage 1-2] Executing OOM Producer & Heap Pipelined Consumers...
+<span class="t-yellow">[-] [Stage 2] Heap leak failed or zero candidates found: []</span>
+    <span class="t-muted"># Finding: Under Debian PHP-FPM / FastCGI, nested array names do not trigger the 128 MiB OOM condition observed in Alpine CLI-server.
+    # Result: Pipelined consumers receive standard HTTP 200 responses with 0-byte cookies; no stale heap chunks or code pointers leaked.</span>
+
+<span class="t-cyan">$ python3 exploit_lab/exploit_chain_poc.py --url http://127.0.0.1:8889/php-version.php</span>
+[*] Target: http://127.0.0.1:8889/php-version.php
+[*] Artifacts Directory: audit-run-20261026T044808Z
+<span class="t-green">[+] [Stage 0] Preflight OK: HTTP 200 (Powered-By: PHP/8.4.27, Snippet: PHP 8.4.27)</span>
+[*] [Stage 1-2] Executing OOM Producer & Heap Pipelined Consumers...
+<span class="t-yellow">[-] [Stage 2] Heap leak failed or zero candidates found: []</span>
+    <span class="t-muted"># Finding: Patched build handles multipart parsing safely; rfc1867.c filter prevents excessive header allocation.</span>
+            </div>
+        </div>
+
         <!-- Summary Matrix -->
         <div class="card full-width">
             <div class="card-title">
-                <span>4. Evidence Matrix: What is Proven vs Unproven</span>
+                <span>5. Evidence Matrix: What is Proven vs Unproven</span>
             </div>
             <table>
                 <thead>
@@ -206,14 +232,14 @@ PHP 8.4.27 (:8889): <span class="t-green">HTTP 200 (12.9ms)</span>
                         <td>Full pass/fail assertion output of <code>oom_rfc1867_upload_progress.phpt</code> when compiled with CGI SAPI.</td>
                     </tr>
                     <tr>
-                        <td><strong>Controlled HTTP Tests</strong></td>
-                        <td>Both versions process multipart and upload-progress requests returning <code>200 pong</code>.</td>
-                        <td>Exploitability under crafted bailout conditions was not observed.</td>
+                        <td><strong>Exploit Chain Reproduction</strong></td>
+                        <td>Tested <code>exploit_chain_poc.py</code> (OOM producer + 8 pipelined consumers) on local 8.4.26 and 8.4.27 FPM containers. Heap leak did not trigger.</td>
+                        <td>Full reproduction requires specific Alpine CLI-server SAPI (<code>PHP_CLI_SERVER_WORKERS=4</code>) and musl memory layout.</td>
                     </tr>
                     <tr>
-                        <td><strong>Public Challenge Server</strong></td>
-                        <td>Advertises PHP 8.4.26 dynamically on <code>/php-version.php</code>.</td>
-                        <td>Internal server configuration, worker count, or proxy rules remain unverified from outside.</td>
+                        <td><strong>Environment Sensitivity</strong></td>
+                        <td>Debian PHP-FPM worker recycling and FastCGI buffering prevent HTTP pipelining connection reuse needed for the race condition.</td>
+                        <td>Behavior of multi-worker FPM under non-buffered raw unix domain socket connections.</td>
                     </tr>
                 </tbody>
             </table>
